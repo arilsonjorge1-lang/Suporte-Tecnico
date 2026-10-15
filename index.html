@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Assistência Técnica</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .header {
+      max-width: 1100px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0056b3;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+    }
+    .nav-tabs button {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .nav-tabs button.active {
+      background: white;
+      color: #0056b3;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: #0056b3;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 8px;
+    }
+    .grid-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    @media (max-width: 768px) {
+      .grid-form { grid-template-columns: 1fr; }
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 9px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    textarea {
+      resize: vertical;
+      height: 90px;
+    }
+    .btn-submit {
+      background-color: #25d366;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-submit:hover {
+      background-color: #1eb854;
+    }
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f8f9fa;
+    }
+    .badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .badge-hardware { background-color: #e2e3e5; color: #383d41; }
+    .badge-software { background-color: #d1ecf1; color: #0c5460; }
+    .status-aberto { color: #d39e00; font-weight: bold; }
+    .status-andamento { color: #0056b3; font-weight: bold; }
+    .status-aguardando { color: #fd7e14; font-weight: bold; }
+    .status-resolvido { color: #28a745; font-weight: bold; }
+    
+    .tracking-box {
+      background-color: #e8f4fd;
+      border: 1px solid #b6d4fe;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🛠️ Suporte Técnico</h1>
+  <div class="nav-tabs">
+    <button id="btn-tab-cliente" class="active" onclick="switchTab('cliente')">Portal do Cliente</button>
+    <button id="btn-tab-tecnico" onclick="switchTab('tecnico')">Painel do Técnico</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ================= PORTAL DO CLIENTE ================= -->
+  <div id="tab-cliente" class="tab-content active">
+    
+    <!-- Caixa de Acompanhamento por Link (#ticket-ID) -->
+    <div id="trackingInfo" class="tracking-box" style="display: none;">
+      <h3 style="margin-top:0; color:#0056b3;">🔍 Status do Seu Pedido</h3>
+      <div id="trackingDetails">Carregando informações do chamado...</div>
+    </div>
+
+    <div class="card">
+      <h2>Nova Solicitação de Assistência</h2>
+      <form id="clienteForm">
+        <div class="grid-form">
+          <div class="form-group">
+            <label for="empresa">Nome da Empresa *</label>
+            <input type="text" id="empresa" required placeholder="Ex: Empresa Exemplo LDA">
+          </div>
+
+          <div class="form-group">
+            <label for="solicitante">Seu Nome (Solicitante) *</label>
+            <input type="text" id="solicitante" required placeholder="Ex: João Silva">
+          </div>
+
+          <div class="form-group">
+            <label for="contacto">Contacto Móvel *</label>
+            <input type="tel" id="contacto" required placeholder="Ex: 9912345">
+          </div>
+
+          <div class="form-group">
+            <label for="tipo">Tipo de Problema *</label>
+            <select id="tipo" required>
+              <option value="">Selecione...</option>
+              <option value="Hardware">Hardware (Equipamento / Peças)</option>
+              <option value="Software">Software (Sistemas / Programas)</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="descricao">Descrição do Problema *</label>
+            <textarea id="descricao" required placeholder="Descreva detalhadamente o que está acontecendo..."></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          💬 Abrir Chamado e Enviar para WhatsApp
+        </button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Meus Chamados Registrados</h2>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th># Ticket</th>
+              <th>Empresa</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Estado</th>
+              <th>Acompanhar</th>
+            </tr>
+          </thead>
+          <tbody id="clienteTicketList">
+            <!-- Inserido via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PAINEL DO TÉCNICO ================= -->
+  <div id="tab-tecnico" class="tab-content">
+    <div class="card">
+      <h2>Gestão Geral de Chamados</h2>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Empresa / Solicitante</th>
+              <th>Móvel</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Estado (Alterar)</th>
+            </tr>
+          </thead>
+          <tbody id="tecnicoTicketList">
+            <!-- Inserido via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let tickets = [];
+  let nextId = 1;
+  const SEU_WHATSAPP = "2389930138"; // Número de suporte de Cabo Verde
+
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-tabs button').forEach(el => el.classList.remove('active'));
+
+    if(tabName === 'cliente') {
+      document.getElementById('tab-cliente').classList.add('active');
+      document.getElementById('btn-tab-cliente').classList.add('active');
+    } else {
+      document.getElementById('tab-tecnico').classList.add('active');
+      document.getElementById('btn-tab-tecnico').classList.add('active');
+    }
+  }
+
+  function gerarLinkAcompanhamento(ticketId) {
+    const urlAtual = window.location.href.split('#')[0];
+    return `${urlAtual}#ticket-${ticketId}`;
+  }
+
+  function enviarNotificacaoWhatsApp(ticket) {
+    const linkAcompanhamento = gerarLinkAcompanhamento(ticket.id);
+
+    const textoMensagem = 
+`🚨 *NOVO CHAMADO DE ASSISTÊNCIA* (#${ticket.id})
+
+🏢 *Empresa:* ${ticket.empresa}
+👤 *Solicitante:* ${ticket.solicitante}
+📞 *Contacto:* ${ticket.contacto}
+💻 *Tipo:* ${ticket.tipo}
+📝 *Descrição:* ${ticket.descricao}
+
+🔗 *Link para Acompanhar o Pedido:*
+${linkAcompanhamento}`;
+
+    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${SEU_WHATSAPP}&text=${encodeURIComponent(textoMensagem)}`;
+    
+    window.open(urlWhatsApp, '_blank');
+  }
+
+  document.getElementById('clienteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const newTicket = {
+      id: nextId++,
+      empresa: document.getElementById('empresa').value,
+      solicitante: document.getElementById('solicitante').value,
+      contacto: document.getElementById('contacto').value,
+      tipo: document.getElementById('tipo').value,
+      descricao: document.getElementById('descricao').value,
+      estado: 'Aberto'
+    };
+
+    tickets.push(newTicket);
+    this.reset();
+    
+    renderTickets();
+    enviarNotificacaoWhatsApp(newTicket);
+  });
+
+  function updateStatus(id, newStatus) {
+    const ticket = tickets.find(t => t.id === id);
+    if (ticket) {
+      ticket.estado = newStatus;
+      renderTickets();
+      verificarHashAcompanhamento();
+    }
+  }
+
+  function getStatusClass(estado) {
+    switch(estado) {
+      case 'Aberto': return 'status-aberto';
+      case 'Em Andamento': return 'status-andamento';
+      case 'Aguardando Cliente': return 'status-aguardando';
+      case 'Resolvido': return 'status-resolvido';
+      default: return '';
+    }
+  }
+
+  function renderTickets() {
+    const clienteList = document.getElementById('clienteTicketList');
+    const tecnicoList = document.getElementById('tecnicoTicketList');
+
+    clienteList.innerHTML = '';
+    tecnicoList.innerHTML = '';
+
+    if (tickets.length === 0) {
+      const emptyRow = '<tr><td colspan="6" style="text-align:center; color:#888;">Nenhum chamado registrado.</td></tr>';
+      clienteList.innerHTML = emptyRow;
+      tecnicoList.innerHTML = emptyRow;
+      return;
+    }
+
+    tickets.forEach(ticket => {
+      const tipoClass = ticket.tipo === 'Hardware' ? 'badge-hardware' : 'badge-software';
+      const statusClass = getStatusClass(ticket.estado);
+      const link = gerarLinkAcompanhamento(ticket.id);
+
+      // Renderiza Tabela do Cliente
+      const rowCliente = document.createElement('tr');
+      rowCliente.innerHTML = `
+        <td><strong>#${ticket.id}</strong></td>
+        <td>${ticket.empresa}</td>
+        <td><span class="badge ${tipoClass}">${ticket.tipo}</span></td>
+        <td>${ticket.descricao}</td>
+        <td><span class="${statusClass}">${ticket.estado}</span></td>
+        <td><a href="${link}" style="color:#0056b3; font-weight:bold;">Link Direto</a></td>
+      `;
+      clienteList.appendChild(rowCliente);
+
+      // Renderiza Tabela do Técnico
+      const rowTecnico = document.createElement('tr');
+      rowTecnico.innerHTML = `
+        <td><strong>#${ticket.id}</strong></td>
+        <td>
+          <strong>${ticket.empresa}</strong><br>
+          <small style="color:#666;">${ticket.solicitante}</small>
+        </td>
+        <td><a href="tel:${ticket.contacto}" style="color:#0056b3; font-weight:bold;">${ticket.contacto}</a></td>
+        <td><span class="badge ${tipoClass}">${ticket.tipo}</span></td>
+        <td>${ticket.descricao}</td>
+        <td>
+          <select style="padding:4px;" onchange="updateStatus(${ticket.id}, this.value)">
+            <option value="Aberto" ${ticket.estado === 'Aberto' ? 'selected' : ''}>🟡 Aberto</option>
+            <option value="Em Andamento" ${ticket.estado === 'Em Andamento' ? 'selected' : ''}>🔵 Em Andamento</option>
+            <option value="Aguardando Cliente" ${ticket.estado === 'Aguardando Cliente' ? 'selected' : ''}>🟠 Aguardando Cliente</option>
+            <option value="Resolvido" ${ticket.estado === 'Resolvido' ? 'selected' : ''}>🟢 Resolvido</option>
+          </select>
+        </td>
+      `;
+      tecnicoList.appendChild(rowTecnico);
+    });
+  }
+
+  function verificarHashAcompanhamento() {
+    const hash = window.location.hash;
+    const trackingBox = document.getElementById('trackingInfo');
+    const trackingDetails = document.getElementById('trackingDetails');
+
+    if (hash.startsWith('#ticket-')) {
+      const ticketId = parseInt(hash.replace('#ticket-', ''));
+      const ticket = tickets.find(t => t.id === ticketId);
+
+      if (ticket) {
+        trackingBox.style.display = 'block';
+        trackingDetails.innerHTML = `
+          <strong>Chamado #${ticket.id}</strong> - ${ticket.empresa}<br>
+          <strong>Solicitante:</strong> ${ticket.solicitante} (${ticket.contacto})<br>
+          <strong>Tipo:</strong> ${ticket.tipo}<br>
+          <strong>Estado Atual:</strong> <span class="${getStatusClass(ticket.estado)}">${ticket.estado}</span><br>
+          <strong>Descrição:</strong> ${ticket.descricao}
+        `;
+      } else {
+        trackingBox.style.display = 'block';
+        trackingDetails.innerHTML = `⚠️ O chamado <strong>#${ticketId}</strong> não foi localizado no sistema.`;
+      }
+    } else {
+      trackingBox.style.display = 'none';
+    }
+  }
+
+  window.addEventListener('hashchange', verificarHashAcompanhamento);
+  
+  // Execução Inicial
+  renderTickets();
+  verificarHashAcompanhamento();
+</script>
+
+</body>
+</html>
