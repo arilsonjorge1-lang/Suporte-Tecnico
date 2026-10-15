@@ -158,6 +158,20 @@
       border-radius: 6px;
       margin-bottom: 15px;
     }
+
+    .btn-clear {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      float: right;
+    }
+    .btn-clear:hover {
+      background-color: #c82333;
+    }
   </style>
 </head>
 <body>
@@ -246,6 +260,7 @@
   <!-- ================= PAINEL DO TÉCNICO ================= -->
   <div id="tab-tecnico" class="tab-content">
     <div class="card">
+      <button class="btn-clear" onclick="limparHistorico()">🗑️ Limpar Todo Histórico</button>
       <h2>Gestão Geral de Chamados</h2>
       <div class="table-responsive">
         <table>
@@ -270,9 +285,15 @@
 </div>
 
 <script>
-  let tickets = [];
-  let nextId = 1;
-  const SEU_WHATSAPP = "2389930138"; // Número de suporte de Cabo Verde
+  // 1. CARREGAR DADOS SALVOS DO LOCALSTORAGE
+  let tickets = JSON.parse(localStorage.getItem('meus_tickets')) || [];
+  let nextId = tickets.length > 0 ? Math.max(...tickets.map(t => t.id)) + 1 : 1;
+  const SEU_WHATSAPP = "2389930138";
+
+  // 2. SALVAR DADOS NO NAVEGADOR
+  function salvarNoLocalStorage() {
+    localStorage.setItem('meus_tickets', JSON.stringify(tickets));
+  }
 
   function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -326,8 +347,9 @@ ${linkAcompanhamento}`;
     };
 
     tickets.push(newTicket);
+    salvarNoLocalStorage(); // 💾 Guarda o chamado no navegador
+
     this.reset();
-    
     renderTickets();
     enviarNotificacaoWhatsApp(newTicket);
   });
@@ -336,6 +358,17 @@ ${linkAcompanhamento}`;
     const ticket = tickets.find(t => t.id === id);
     if (ticket) {
       ticket.estado = newStatus;
+      salvarNoLocalStorage(); // 💾 Salva a alteração do estado
+      renderTickets();
+      verificarHashAcompanhamento();
+    }
+  }
+
+  function limparHistorico() {
+    if (confirm("Tem certeza que deseja apagar todo o histórico de chamados?")) {
+      tickets = [];
+      nextId = 1;
+      localStorage.removeItem('meus_tickets');
       renderTickets();
       verificarHashAcompanhamento();
     }
