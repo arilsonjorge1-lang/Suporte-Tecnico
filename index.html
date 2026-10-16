@@ -112,8 +112,13 @@
           </div>
 
           <div class="form-group">
+            <label for="email">E-mail *</label>
+            <input type="email" id="email" required placeholder="Ex: cliente@empresa.com">
+          </div>
+
+          <div class="form-group">
             <label for="contacto">Contacto Móvel *</label>
-            <input type="tel" id="contacto" pattern="[9][0-9]{6}" required placeholder="Ex: 9x (7 dígitos)">
+            <input type="text" id="contacto" required placeholder="Insira o seu contacto">
           </div>
 
           <div class="form-group">
@@ -191,7 +196,7 @@
       <h2>Gestão Geral de Chamados</h2>
       
       <div class="filter-bar">
-        <input type="text" id="searchInput" onkeyup="renderTickets()" placeholder="🔍 Pesquisar por empresa ou nome...">
+        <input type="text" id="searchInput" onkeyup="renderTickets()" placeholder="🔍 Pesquisar por empresa, nome ou e-mail...">
         <select id="filterStatus" onchange="renderTickets()">
           <option value="">Todos os Estados</option>
           <option value="Aberto">🟡 Aberto</option>
@@ -278,12 +283,11 @@
     return `${urlAtual}#ticket-${ticketId}`;
   }
 
-  // Função para calcular diferença de tempo formatada
   function calcularDuracao(timestampInicio, timestampFim) {
     if (!timestampInicio) return "Aguardando início";
     
     const inicio = new Date(timestampInicio);
-    const fim = timestampFim ? new Date(timestampFim) : new Date(); // Se não fechou, calcula o tempo decorrido até agora
+    const fim = timestampFim ? new Date(timestampFim) : new Date();
     const diffMs = fim - inicio;
 
     if (diffMs < 0) return "-";
@@ -310,6 +314,7 @@
 
 🏢 *Empresa:* ${ticket.empresa}
 👤 *Solicitante:* ${ticket.solicitante}
+📧 *E-mail:* ${ticket.email}
 📞 *Contacto:* ${ticket.contacto}
 💻 *Tipo:* ${ticket.tipo}
 ⚡ *Prioridade:* ${ticket.prioridade}
@@ -347,6 +352,7 @@ ${linkAcompanhamento}`;
       id: nextId,
       empresa: document.getElementById('empresa').value,
       solicitante: document.getElementById('solicitante').value,
+      email: document.getElementById('email').value,
       contacto: document.getElementById('contacto').value,
       tipo: document.getElementById('tipo').value,
       prioridade: document.getElementById('prioridade').value,
@@ -363,25 +369,21 @@ ${linkAcompanhamento}`;
     enviarNotificacaoWhatsApp(newTicket);
   });
 
-  // Atualização de estado com gravação dos timestamps de início e fecho
   window.updateStatus = function(firebaseKey, newStatus) {
     const ticketRef = ref(db, `tickets/${firebaseKey}`);
     const ticketAtual = tickets.find(t => t.firebaseKey === firebaseKey);
     const agora = new Date();
     const updateData = { estado: newStatus };
 
-    // Regista o início quando entra em "Em Andamento"
     if (newStatus === 'Em Andamento' && !ticketAtual.timestampInicio) {
       updateData.timestampInicio = agora.toISOString();
       updateData.dataInicio = agora.toLocaleString('pt-PT');
     }
 
-    // Regista o fecho quando alterado para "Resolvido"
     if (newStatus === 'Resolvido') {
       updateData.timestampFecho = agora.toISOString();
       updateData.dataFecho = agora.toLocaleString('pt-PT');
       
-      // Se não passou pelo estado "Em Andamento", usa a hora de fecho também como referência de início
       if (!ticketAtual.timestampInicio) {
         updateData.timestampInicio = ticketAtual.timestampCriacao;
         updateData.dataInicio = ticketAtual.dataCriacao;
@@ -426,7 +428,9 @@ ${linkAcompanhamento}`;
     tecnicoList.innerHTML = '';
 
     const filteredTickets = tickets.filter(t => {
-      const matchSearch = t.empresa.toLowerCase().includes(searchTerm) || t.solicitante.toLowerCase().includes(searchTerm);
+      const matchSearch = t.empresa.toLowerCase().includes(searchTerm) || 
+                          t.solicitante.toLowerCase().includes(searchTerm) || 
+                          (t.email && t.email.toLowerCase().includes(searchTerm));
       const matchStatus = filterStatus === '' || t.estado === filterStatus;
       return matchSearch && matchStatus;
     });
@@ -442,7 +446,6 @@ ${linkAcompanhamento}`;
       const statusClass = getStatusClass(ticket.estado);
       const link = gerarLinkAcompanhamento(ticket.id);
       
-      // Duração da Intervenção (Andamento -> Fecho)
       const duracaoIntervencao = calcularDuracao(ticket.timestampInicio, ticket.timestampFecho);
 
       // Tabela do Cliente
@@ -473,7 +476,8 @@ ${linkAcompanhamento}`;
         </td>
         <td>
           <strong>${ticket.empresa}</strong><br>
-          <small style="color:#666;">${ticket.solicitante}</small>
+          <small style="color:#666;">${ticket.solicitante}</small><br>
+          <small style="color:#0056b3;">✉️ ${ticket.email || '-'}</small>
         </td>
         <td><a href="tel:${ticket.contacto}" style="color:#0056b3; font-weight:bold;">${ticket.contacto}</a></td>
         <td>
@@ -520,6 +524,7 @@ ${linkAcompanhamento}`;
             <th>Duração da Intervenção</th>
             <th>Empresa</th>
             <th>Solicitante</th>
+            <th>E-mail</th>
             <th>Contacto</th>
             <th>Tipo</th>
             <th>Prioridade</th>
@@ -539,6 +544,7 @@ ${linkAcompanhamento}`;
           <td>${duracaoIntervencao}</td>
           <td>${t.empresa}</td>
           <td>${t.solicitante}</td>
+          <td>${t.email || '-'}</td>
           <td>${t.contacto}</td>
           <td>${t.tipo}</td>
           <td>${t.prioridade || 'Média'}</td>
@@ -580,6 +586,7 @@ ${linkAcompanhamento}`;
           <strong>Fecho:</strong> ${ticket.dataFecho || 'Em aberto'}<br>
           <strong>Tempo em Atendimento:</strong> ${duracao}<br>
           <strong>Solicitante:</strong> ${ticket.solicitante} (${ticket.contacto})<br>
+          <strong>E-mail:</strong> ${ticket.email || '-'}<br>
           <strong>Tipo / Prioridade:</strong> ${ticket.tipo} (${ticket.prioridade || 'Média'})<br>
           <strong>Estado Atual:</strong> <span class="${getStatusClass(ticket.estado)}">${ticket.estado}</span><br>
           <strong>Descrição:</strong> ${ticket.descricao}
