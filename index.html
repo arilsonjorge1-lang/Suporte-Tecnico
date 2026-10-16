@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Assistência Técnica</title>
+  <title>Sistema de Assistência Técnica (Nuvem)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -158,26 +158,12 @@
       border-radius: 6px;
       margin-bottom: 15px;
     }
-
-    .btn-clear {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      border-radius: 4px;
-      cursor: pointer;
-      float: right;
-    }
-    .btn-clear:hover {
-      background-color: #c82333;
-    }
   </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>🛠️ Suporte Técnico</h1>
+  <h1>🛠️ Suporte Técnico (Nuvem)</h1>
   <div class="nav-tabs">
     <button id="btn-tab-cliente" class="active" onclick="switchTab('cliente')">Portal do Cliente</button>
     <button id="btn-tab-tecnico" onclick="switchTab('tecnico')">Painel do Técnico</button>
@@ -189,7 +175,6 @@
   <!-- ================= PORTAL DO CLIENTE ================= -->
   <div id="tab-cliente" class="tab-content active">
     
-    <!-- Caixa de Acompanhamento por Link (#ticket-ID) -->
     <div id="trackingInfo" class="tracking-box" style="display: none;">
       <h3 style="margin-top:0; color:#0056b3;">🔍 Status do Seu Pedido</h3>
       <div id="trackingDetails">Carregando informações do chamado...</div>
@@ -211,7 +196,7 @@
 
           <div class="form-group">
             <label for="contacto">Contacto Móvel *</label>
-            <input type="tel" id="contacto" required placeholder="Ex: 9912345">
+            <input type="tel" id="contacto" required placeholder="Ex: 9x">
           </div>
 
           <div class="form-group">
@@ -250,7 +235,6 @@
             </tr>
           </thead>
           <tbody id="clienteTicketList">
-            <!-- Inserido via JavaScript -->
           </tbody>
         </table>
       </div>
@@ -260,7 +244,6 @@
   <!-- ================= PAINEL DO TÉCNICO ================= -->
   <div id="tab-tecnico" class="tab-content">
     <div class="card">
-      <button class="btn-clear" onclick="limparHistorico()">🗑️ Limpar Todo Histórico</button>
       <h2>Gestão Geral de Chamados</h2>
       <div class="table-responsive">
         <table>
@@ -275,7 +258,6 @@
             </tr>
           </thead>
           <tbody id="tecnicoTicketList">
-            <!-- Inserido via JavaScript -->
           </tbody>
         </table>
       </div>
@@ -284,18 +266,32 @@
 
 </div>
 
-<script>
-  // 1. CARREGAR DADOS SALVOS DO LOCALSTORAGE
-  let tickets = JSON.parse(localStorage.getItem('meus_tickets')) || [];
-  let nextId = tickets.length > 0 ? Math.max(...tickets.map(t => t.id)) + 1 : 1;
+<!-- Firebase SDKs via CDN -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  // Suas credenciais do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBvjKpDmJwYh7q0vDzEfQiaKgtIPjU7yRY",
+    authDomain: "suporte-t-e7dd8.firebaseapp.com",
+    databaseURL: "https://suporte-t-e7dd8-default-rtdb.firebaseio.com",
+    projectId: "suporte-t-e7dd8",
+    storageBucket: "suporte-t-e7dd8.firebasestorage.app",
+    messagingSenderId: "865272013915",
+    appId: "1:865272013915:web:b075645cbcf2dacb4b8b7e",
+    measurementId: "G-WQR7D14RJK"
+  };
+
+  // Inicializar Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const ticketsRef = ref(db, 'tickets');
+
+  let tickets = [];
   const SEU_WHATSAPP = "2389930138";
 
-  // 2. SALVAR DADOS NO NAVEGADOR
-  function salvarNoLocalStorage() {
-    localStorage.setItem('meus_tickets', JSON.stringify(tickets));
-  }
-
-  function switchTab(tabName) {
+  window.switchTab = function(tabName) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-tabs button').forEach(el => el.classList.remove('active'));
 
@@ -306,7 +302,7 @@
       document.getElementById('tab-tecnico').classList.add('active');
       document.getElementById('btn-tab-tecnico').classList.add('active');
     }
-  }
+  };
 
   function gerarLinkAcompanhamento(ticketId) {
     const urlAtual = window.location.href.split('#')[0];
@@ -329,50 +325,56 @@
 ${linkAcompanhamento}`;
 
     const urlWhatsApp = `https://api.whatsapp.com/send?phone=${SEU_WHATSAPP}&text=${encodeURIComponent(textoMensagem)}`;
-    
     window.open(urlWhatsApp, '_blank');
   }
 
+  // Escutar alterações em tempo real no Firebase
+  onValue(ticketsRef, (snapshot) => {
+    const data = snapshot.val();
+    tickets = [];
+    
+    if (data) {
+      Object.keys(data).forEach(key => {
+        tickets.push({
+          firebaseKey: key,
+          ...data[key]
+        });
+      });
+    }
+
+    renderTickets();
+    verificarHashAcompanhamento();
+  });
+
+  // Salvar novo chamado no Firebase
   document.getElementById('clienteForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
+    const nextId = tickets.length > 0 ? Math.max(...tickets.map(t => t.id || 0)) + 1 : 1;
+
     const newTicket = {
-      id: nextId++,
+      id: nextId,
       empresa: document.getElementById('empresa').value,
       solicitante: document.getElementById('solicitante').value,
       contacto: document.getElementById('contacto').value,
       tipo: document.getElementById('tipo').value,
       descricao: document.getElementById('descricao').value,
-      estado: 'Aberto'
+      estado: 'Aberto',
+      dataCriacao: new Date().toISOString()
     };
 
-    tickets.push(newTicket);
-    salvarNoLocalStorage(); // 💾 Guarda o chamado no navegador
+    const newTicketRef = push(ticketsRef);
+    set(newTicketRef, newTicket);
 
     this.reset();
-    renderTickets();
     enviarNotificacaoWhatsApp(newTicket);
   });
 
-  function updateStatus(id, newStatus) {
-    const ticket = tickets.find(t => t.id === id);
-    if (ticket) {
-      ticket.estado = newStatus;
-      salvarNoLocalStorage(); // 💾 Salva a alteração do estado
-      renderTickets();
-      verificarHashAcompanhamento();
-    }
-  }
-
-  function limparHistorico() {
-    if (confirm("Tem certeza que deseja apagar todo o histórico de chamados?")) {
-      tickets = [];
-      nextId = 1;
-      localStorage.removeItem('meus_tickets');
-      renderTickets();
-      verificarHashAcompanhamento();
-    }
-  }
+  // Atualizar status do chamado no Firebase
+  window.updateStatus = function(firebaseKey, newStatus) {
+    const ticketRef = ref(db, `tickets/${firebaseKey}`);
+    update(ticketRef, { estado: newStatus });
+  };
 
   function getStatusClass(estado) {
     switch(estado) {
@@ -427,7 +429,7 @@ ${linkAcompanhamento}`;
         <td><span class="badge ${tipoClass}">${ticket.tipo}</span></td>
         <td>${ticket.descricao}</td>
         <td>
-          <select style="padding:4px;" onchange="updateStatus(${ticket.id}, this.value)">
+          <select style="padding:4px;" onchange="updateStatus('${ticket.firebaseKey}', this.value)">
             <option value="Aberto" ${ticket.estado === 'Aberto' ? 'selected' : ''}>🟡 Aberto</option>
             <option value="Em Andamento" ${ticket.estado === 'Em Andamento' ? 'selected' : ''}>🔵 Em Andamento</option>
             <option value="Aguardando Cliente" ${ticket.estado === 'Aguardando Cliente' ? 'selected' : ''}>🟠 Aguardando Cliente</option>
@@ -459,7 +461,7 @@ ${linkAcompanhamento}`;
         `;
       } else {
         trackingBox.style.display = 'block';
-        trackingDetails.innerHTML = `⚠️ O chamado <strong>#${ticketId}</strong> não foi localizado no sistema.`;
+        trackingDetails.innerHTML = `⚠️ O chamado <strong>#${ticketId}</strong> não foi localizado no banco de dados.`;
       }
     } else {
       trackingBox.style.display = 'none';
@@ -467,10 +469,6 @@ ${linkAcompanhamento}`;
   }
 
   window.addEventListener('hashchange', verificarHashAcompanhamento);
-  
-  // Execução Inicial
-  renderTickets();
-  verificarHashAcompanhamento();
 </script>
 
 </body>
