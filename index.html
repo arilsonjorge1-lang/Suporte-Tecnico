@@ -1,90 +1,427 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Assistência Técnica Pro</title>
+  <title>Sistema de Assistência Técnica - Tech & Digital Transformation</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-    
+    /* ================= PALETA MODO ESCURO (DEFAULT) ================= */
+    [data-theme="dark"] {
+      --bg-dark: #0B0F19;
+      --card-bg: rgba(17, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.1);
+      
+      --neon-blue: #00F2FE;
+      --neon-cyan: #4FACFE;
+      --neon-purple: #7928CA;
+      --neon-green: #10B981;
+      --neon-orange: #F59E0B;
+      --neon-red: #EF4444;
+
+      --text-main: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --input-bg: rgba(31, 41, 55, 0.6);
+      --table-header-bg: rgba(31, 41, 55, 0.5);
+      --table-hover: rgba(255, 255, 255, 0.03);
+    }
+
+    /* ================= PALETA MODO CLARO ================= */
+    [data-theme="light"] {
+      --bg-dark: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --card-border: #E2E8F0;
+      
+      --neon-blue: #0284C7;
+      --neon-cyan: #2563EB;
+      --neon-purple: #6D28D9;
+      --neon-green: #059669;
+      --neon-orange: #D97706;
+      --neon-red: #DC2626;
+
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --input-bg: #F1F5F9;
+      --table-header-bg: #F1F5F9;
+      --table-hover: #F8FAFC;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(121, 40, 202, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
+      margin: 0;
+      padding: 24px 16px;
+      color: var(--text-main);
+    }
+
+    /* Header High-Tech */
     .header {
-      max-width: 1250px; margin: 0 auto 20px auto; display: flex;
-      justify-content: space-between; align-items: center;
-      background: #0056b3; padding: 15px 20px; border-radius: 8px; color: white;
+      max-width: 1250px;
+      margin: 0 auto 24px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      padding: 18px 28px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
     }
-    .header h1 { margin: 0; font-size: 1.4rem; }
-    .nav-tabs { display: flex; gap: 10px; }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Botão de Troca de Tema */
+    .theme-toggle-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--neon-blue);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--input-bg);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+
     .nav-tabs button {
-      background: rgba(255, 255, 255, 0.2); border: none; color: white;
-      padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 9px 20px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
     }
-    .nav-tabs button.active { background: white; color: #0056b3; }
-    
-    .container { max-width: 1250px; margin: 0 auto; }
+
+    .nav-tabs button:hover {
+      color: var(--text-main);
+    }
+
+    .nav-tabs button.active {
+      background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: 0 auto;
+    }
+
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    h2 { margin-top: 0; font-size: 1.2rem; color: #0056b3; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; }
-    
-    /* Metrics Dashboard */
-    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .metric-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid #0056b3; }
-    .metric-card.aberto { border-color: #d39e00; }
-    .metric-card.andamento { border-color: #0056b3; }
-    .metric-card.resolvido { border-color: #28a745; }
-    .metric-value { font-size: 1.8rem; font-weight: bold; margin-top: 5px; }
 
-    .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    @media (max-width: 768px) { .grid-form { grid-template-columns: 1fr; } }
-    
-    .form-group { margin-bottom: 15px; }
+    /* Cards com Efeito Glassmorphism */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      padding: 28px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 14px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Dashboard de Métricas */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--neon-cyan);
+    }
+
+    .metric-card:hover { 
+      transform: translateY(-2px);
+      border-color: rgba(0, 242, 254, 0.3);
+    }
+
+    .metric-card.aberto::before { background: var(--neon-orange); }
+    .metric-card.andamento::before { background: var(--neon-cyan); }
+    .metric-card.resolvido::before { background: var(--neon-green); }
+
+    .metric-card small {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .metric-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-top: 6px;
+      color: var(--text-main);
+    }
+
+    /* Formulário Grid */
+    .grid-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 820px) {
+      .grid-form { grid-template-columns: 1fr; }
+      .header { flex-direction: column; gap: 16px; text-align: center; }
+      .header-controls { flex-direction: column; width: 100%; }
+    }
+
+    .form-group { margin-bottom: 0; }
     .form-group.full-width { grid-column: 1 / -1; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
-    input, select, textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
-    textarea { resize: vertical; height: 90px; }
-    
-    .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; }
-    .filter-bar input, .filter-bar select { width: auto; flex: 1; min-width: 150px; }
 
-    .btn-submit { background-color: #25d366; color: white; border: none; padding: 12px; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
-    .btn-submit:hover { background-color: #1eb854; }
-    
-    .btn-export { background-color: #28a745; color: white; border: none; padding: 9px 15px; font-size: 0.9rem; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .btn-export:hover { background-color: #218838; }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
 
-    .btn-delete { background-color: #dc3545; color: white; border: none; padding: 5px 10px; font-size: 0.78rem; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .btn-delete:hover { background-color: #c82333; }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      font-size: 0.9rem;
+      background-color: var(--input-bg);
+      color: var(--text-main);
+    }
 
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+    }
+
+    textarea { resize: vertical; height: 100px; }
+
+    /* Barra de Filtros e Procura */
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-bar input, .filter-bar select {
+      width: auto;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    /* Botões Neon */
+    .btn-submit {
+      background: linear-gradient(135deg, #059669 0%, var(--neon-green) 100%);
+      color: white;
+      border: none;
+      padding: 15px 24px;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-export {
+      background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 0.88rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(121, 40, 202, 0.25);
+    }
+
+    .btn-export:hover { 
+      transform: translateY(-1px);
+    }
+
+    .btn-delete {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: var(--neon-red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-delete:hover { 
+      background-color: var(--neon-red);
+      color: white;
+    }
+
+    /* Tabelas */
     .table-responsive { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background-color: #f8f9fa; }
-    
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
-    .badge-hardware { background-color: #e2e3e5; color: #383d41; }
-    .badge-software { background-color: #d1ecf1; color: #0c5460; }
-    
-    .prio-Baixa { color: #28a745; font-weight: bold; }
-    .prio-Média { color: #d39e00; font-weight: bold; }
-    .prio-Alta { color: #fd7e14; font-weight: bold; }
-    .prio-Crítica { color: #dc3545; font-weight: bold; }
 
-    .status-aberto { color: #d39e00; font-weight: bold; }
-    .status-andamento { color: #0056b3; font-weight: bold; }
-    .status-aguardando { color: #fd7e14; font-weight: bold; }
-    .status-resolvido { color: #28a745; font-weight: bold; }
-    
-    .tracking-box { background-color: #e8f4fd; border: 1px solid #b6d4fe; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 8px;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background-color: var(--table-header-bg);
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      padding: 14px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    td {
+      padding: 16px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+      vertical-align: middle;
+    }
+
+    tr:hover td { background-color: var(--table-hover); }
+
+    /* Badges / Etiquetas */
+    .badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .badge-hardware { background-color: rgba(156, 163, 175, 0.15); color: var(--text-muted); border: 1px solid var(--card-border); }
+    .badge-software { background-color: rgba(0, 242, 254, 0.15); color: var(--neon-blue); border: 1px solid rgba(0, 242, 254, 0.3); }
+
+    .prio-Baixa { color: var(--neon-green); font-weight: 600; }
+    .prio-Média { color: var(--neon-orange); font-weight: 600; }
+    .prio-Alta { color: #F97316; font-weight: 600; }
+    .prio-Crítica { color: var(--neon-red); font-weight: 800; }
+
+    .status-aberto { color: var(--neon-orange); font-weight: 700; }
+    .status-andamento { color: var(--neon-blue); font-weight: 700; }
+    .status-aguardando { color: #FBBF24; font-weight: 700; }
+    .status-resolvido { color: var(--neon-green); font-weight: 700; }
+
+    /* Caixa de Acompanhamento */
+    .tracking-box {
+      background: rgba(0, 242, 254, 0.05);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
   </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>🛠️ Suporte Técnico Pro</h1>
-  <div class="nav-tabs">
-    <button id="btn-tab-cliente" class="active" onclick="switchTab('cliente')">Portal do Cliente</button>
-    <button id="btn-tab-tecnico" onclick="switchTab('tecnico')">Painel do Técnico</button>
+  <div class="header-brand">
+    <span style="font-size: 1.6rem;">🤖</span>
+    <h1>Suporte Técnico Pro</h1>
+  </div>
+  
+  <div class="header-controls">
+    <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()">
+      <span id="themeIcon">☀️</span> <span id="themeText">Modo Claro</span>
+    </button>
+    <div class="nav-tabs">
+      <button id="btn-tab-cliente" class="active" onclick="switchTab('cliente')">Portal do Cliente</button>
+      <button id="btn-tab-tecnico" onclick="switchTab('tecnico')">Painel do Técnico</button>
+    </div>
   </div>
 </div>
 
@@ -93,12 +430,12 @@
   <!-- ================= PORTAL DO CLIENTE ================= -->
   <div id="tab-cliente" class="tab-content active">
     <div id="trackingInfo" class="tracking-box" style="display: none;">
-      <h3 style="margin-top:0; color:#0056b3;">🔍 Status do Seu Pedido</h3>
+      <h3 style="margin-top:0; color:var(--neon-blue);">🔍 Status do Seu Pedido</h3>
       <div id="trackingDetails">Carregando informações do chamado...</div>
     </div>
 
     <div class="card">
-      <h2>Nova Solicitação de Assistência</h2>
+      <h2>⚡ Nova Solicitação de Assistência</h2>
       <form id="clienteForm">
         <div class="grid-form">
           <div class="form-group">
@@ -146,14 +483,14 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-submit">
+        <button type="submit" class="btn-submit" style="margin-top: 20px;">
           💬 Abrir Chamado e Enviar para WhatsApp
         </button>
       </form>
     </div>
 
     <div class="card">
-      <h2>Meus Chamados Registrados</h2>
+      <h2>📊 Meus Chamados Registrados</h2>
       <div class="table-responsive">
         <table>
           <thead>
@@ -179,21 +516,21 @@
     
     <div class="metrics-grid">
       <div class="metric-card aberto">
-        <small style="color:#666;">Abertos</small>
+        <small>Abertos</small>
         <div class="metric-value status-aberto" id="metricAbertos">0</div>
       </div>
       <div class="metric-card andamento">
-        <small style="color:#666;">Em Andamento</small>
+        <small>Em Andamento</small>
         <div class="metric-value status-andamento" id="metricAndamento">0</div>
       </div>
       <div class="metric-card resolvido">
-        <small style="color:#666;">Resolvidos</small>
+        <small>Resolvidos</small>
         <div class="metric-value status-resolvido" id="metricResolvidos">0</div>
       </div>
     </div>
 
     <div class="card">
-      <h2>Gestão Geral de Chamados</h2>
+      <h2>⚙️ Gestão Geral de Chamados</h2>
       
       <div class="filter-bar">
         <input type="text" id="searchInput" onkeyup="renderTickets()" placeholder="🔍 Pesquisar por empresa, nome ou e-mail...">
@@ -254,6 +591,34 @@
   let tecAutenticado = false;
   const SEU_WHATSAPP = "2389930138";
   const SENHA_TECNICO = "admin123";
+
+  // Lógica do Seletor de Tema
+  window.toggleTheme = function() {
+    const html = document.documentElement;
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    const currentTheme = html.getAttribute('data-theme');
+
+    if (currentTheme === 'dark') {
+      html.setAttribute('data-theme', 'light');
+      icon.innerText = '🌙';
+      text.innerText = 'Modo Escuro';
+      localStorage.setItem('theme', 'light');
+    } else {
+      html.setAttribute('data-theme', 'dark');
+      icon.innerText = '☀️';
+      text.innerText = 'Modo Claro';
+      localStorage.setItem('theme', 'dark');
+    }
+  };
+
+  // Carregar Tema Salvo
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  if (savedTheme === 'light') {
+    document.getElementById('themeIcon').innerText = '🌙';
+    document.getElementById('themeText').innerText = 'Modo Escuro';
+  }
 
   window.switchTab = function(tabName) {
     if(tabName === 'tecnico' && !tecAutenticado) {
@@ -436,8 +801,8 @@ ${linkAcompanhamento}`;
     });
 
     if (filteredTickets.length === 0) {
-      clienteList.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">Nenhum chamado localizado.</td></tr>';
-      tecnicoList.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#888;">Nenhum chamado localizado.</td></tr>';
+      clienteList.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Nenhum chamado localizado.</td></tr>';
+      tecnicoList.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">Nenhum chamado localizado.</td></tr>';
       return;
     }
 
@@ -461,7 +826,7 @@ ${linkAcompanhamento}`;
         <td>${ticket.descricao}</td>
         <td><span class="${statusClass}">${ticket.estado}</span></td>
         <td><strong>${duracaoIntervencao}</strong></td>
-        <td><a href="${link}" style="color:#0056b3; font-weight:bold;">Link Direto</a></td>
+        <td><a href="${link}" style="color:var(--neon-blue); font-weight:bold;">Link Direto</a></td>
       `;
       clienteList.appendChild(rowCliente);
 
@@ -471,23 +836,23 @@ ${linkAcompanhamento}`;
         <td><strong>#${ticket.id}</strong></td>
         <td>
           <small><strong>Abertura:</strong> ${ticket.dataCriacao || '-'}</small><br>
-          <small style="color:#0056b3;"><strong>Início:</strong> ${ticket.dataInicio || '-'}</small><br>
-          <small style="color:#28a745;"><strong>Fecho:</strong> ${ticket.dataFecho || '-'}</small>
+          <small style="color:var(--neon-blue);"><strong>Início:</strong> ${ticket.dataInicio || '-'}</small><br>
+          <small style="color:var(--neon-green);"><strong>Fecho:</strong> ${ticket.dataFecho || '-'}</small>
         </td>
         <td>
           <strong>${ticket.empresa}</strong><br>
-          <small style="color:#666;">${ticket.solicitante}</small><br>
-          <small style="color:#0056b3;">✉️ ${ticket.email || '-'}</small>
+          <small style="color:var(--text-muted);">${ticket.solicitante}</small><br>
+          <small style="color:var(--neon-blue);">✉️ ${ticket.email || '-'}</small>
         </td>
-        <td><a href="tel:${ticket.contacto}" style="color:#0056b3; font-weight:bold;">${ticket.contacto}</a></td>
+        <td><a href="tel:${ticket.contacto}" style="color:var(--neon-blue); font-weight:bold;">${ticket.contacto}</a></td>
         <td>
           <span class="badge ${tipoClass}">${ticket.tipo}</span><br>
           <small class="prio-${ticket.prioridade}">${ticket.prioridade || 'Média'}</small>
         </td>
         <td>${ticket.descricao}</td>
         <td>
-          <strong style="color:#0056b3;">${duracaoIntervencao}</strong>
-          ${ticket.estado === 'Em Andamento' ? '<br><small style="color:#fd7e14;">(Em contagem...)</small>' : ''}
+          <strong style="color:var(--neon-blue);">${duracaoIntervencao}</strong>
+          ${ticket.estado === 'Em Andamento' ? '<br><small style="color:var(--neon-orange);">(Em contagem...)</small>' : ''}
         </td>
         <td>
           <select style="padding:4px;" onchange="updateStatus('${ticket.firebaseKey}', this.value)">
@@ -516,7 +881,7 @@ ${linkAcompanhamento}`;
       <head><meta charset="UTF-8"></head>
       <body>
         <table border="1">
-          <tr style="background-color:#0056b3; color:#ffffff; font-weight:bold;">
+          <tr style="background-color:#0B0F19; color:#ffffff; font-weight:bold;">
             <th>ID</th>
             <th>Data Abertura</th>
             <th>Data Início (Em Andamento)</th>
